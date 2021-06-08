@@ -1,0 +1,11 @@
+gym[atari]==0.17.3
+wandb==0.10.30
+opencv-python
+recordclass
+matplotlib
+git+https://github.com/kornia/kornia
+numpy
+pyprind
+-e git+https://github.com/astooke/rlpyt.git@b32d589d12d31ba3c8a9cfb7a3c85c6e350b2904#egg=rlpyt
+hydra-core==1.0.6
+tqdm

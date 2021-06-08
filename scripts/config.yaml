@@ -1,0 +1,179 @@
+hydra:
+  run:
+    dir: ./
+
+experiment_group: ~
+num_logs: 10
+seed: 1
+model_folder: ./
+model_load: ~ # filename to load a pretrained model from
+load_last: True
+offline_model_save: ~ # filename to save pretrain model to
+do_online: true
+full_action_set: false
+save_by_epoch: True
+save_last_only: True
+public: False
+
+agent:
+  eps_eval: 0.001
+  eps_final: 0
+  eps_init: 1
+  repeat_random_lambda: 0
+  softmax_policy: False
+  model_kwargs:
+    aug_prob: 1
+    augmentation: [shift, intensity] # [none, rrc, affine, crop, blur, shift, intensity]
+    target_augmentation: [shift, intensity]
+    eval_augmentation: [none]
+    dqn_hidden_size: 512
+    dropout: 0
+    dueling: 1
+    dynamics_blocks: 0
+    goal_n_step: ${algo.goal_n_step}
+    imagesize: 84
+    jumps: ${algo.jumps}
+    momentum_tau: 0.01
+    encoder: resnet
+    noisy_nets_std: 0.5
+    resblock: inverted
+    freeze_encoder: False
+    expand_ratio: 2
+    cnn_scale_factor: 1
+    blocks_per_group: 3  # 5 for sgi-l
+    ln_for_rl_head: false
+    noisy_nets: 1
+    norm_type: bn
+    predictor: linear
+    projection: q_l1
+    share_l1: False
+    q_l1_type: [value, advantage] # [noisy, value, advantage, relu]
+    renormalize: max
+    residual_tm: 0
+    inverse_model: ${algo.inverse_model_weight}
+    rl: ${algo.rl_weight}
+    bc: ${algo.bc_weight}
+    bc_from_values: True
+    goal_rl: ${algo.goal_weight}
+    goal_all_to_all: ${algo.goal_all_to_all}
+    conv_goal: ${algo.conv_goal}
+    spr: 1
+    goal_conditioning_type: [goal_only,film]
+    load_head_to: 1
+    load_compat_mode: True
+algo:
+  rl_weight: 1
+  spr_weight: 5
+  goal_weight: 0
+  bc_weight: 0
+  inverse_model_weight: 0
+  discount: 0.99
+  batch_size: 32
+  offline: ${runner.epochs}
+  clip_grad_norm: 10
+  clip_model_grad_norm: 10
+  eps_steps: 2001
+  jumps: 5
+  learning_rate: 0.0001
+  encoder_lr: ~
+  q_l1_lr: ~
+  dynamics_model_lr: ~
+  min_steps_learn: 2000
+  n_step_return: 10
+  optim_kwargs:
+    eps: 0.00015
+  pri_alpha: 0.5
+  pri_beta_steps: 100000
+  prioritized_replay: 1
+  replay_ratio: 64
+  target_update_interval: 1
+  target_update_tau: 1
+  goal_permute_prob: 0.2
+  goal_noise_weight: 0.5
+  goal_reward_scale: 10.
+  goal_dist: exp
+  goal_n_step: 1
+  goal_window: 50
+  goal_all_to_all: False
+  conv_goal: True
+  data_writer_args:
+    game: ${env.game}
+    data_dir: None
+    save_data: False
+    checkpoint_size: 1000000
+    imagesize: [84,84]
+    save_name: random
+    mmap: False
+context:
+  log_dir: logs
+  run_ID: 0
+  log_params:
+    game: ${env.game}
+  name: ${env.game}
+  snapshot_mode: last
+  override_prefix: true
+env:
+  game: ms_pacman
+  grayscale: 1
+  imagesize: 84
+  num_img_obs: 4
+  seed: ${seed}
+  full_action_set: ${full_action_set}
+eval_env: ${env}
+runner:
+  affinity:
+    cuda_idx: 0
+  final_eval_only: 1
+  no_eval: 0
+  n_steps: 100000
+  seed: ${seed}
+  epochs: 0
+  save_every: ~
+  dataloader: ${offline.runner.dataloader}
+sampler:
+  batch_B: 1
+  batch_T: 1
+  env_kwargs: ${env}
+  eval_env_kwargs: ${eval_env}
+  eval_max_steps: 2800000  # 28k is just a safe ceiling
+  eval_max_trajectories: 100
+  eval_n_envs: 100
+  max_decorrelation_steps: 0
+wandb:
+  dir: ''
+  entity: ''
+  project: SGI
+  tags: []
+
+# Offline training
+# Can be overridden via CLI arguments to run.py
+offline:
+  agent:
+    model_kwargs:
+      freeze_encoder: false
+  algo:
+    min_steps_learn: 0
+    rl_weight: 0
+  runner:
+    epochs: 0
+    save_every: 5000
+    no_eval: 1
+    dataloader:
+      data_path: ./data/
+      tmp_data_path: ./data/
+      games: [MsPacman]
+      checkpoints: [1,25,50]
+      frames: ${env.num_img_obs}
+      samples: 1000000
+      jumps: ${algo.jumps}
+      n_step_return: ${algo.n_step_return}
+      discount: ${algo.discount}
+      dataset_on_gpu: false
+      dataset_on_disk: false
+      batch_size: ${algo.batch_size}
+      full_action_set: ${full_action_set}
+      num_workers: 0
+      pin_memory: false
+      prefetch_factor: 2
+      group_read_factor: 0
+      shuffle_checkpoints: False
