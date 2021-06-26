@@ -23,9 +23,12 @@ pip install --user -e .
 ## Usage:
 The default branch for the latest and stable changes is `release`. 
 
-* To run SGI:
-1.  Download the DQN replay dataset from https://research.google/tools/datasets/dqn-replay/
+To run SGI:
+1.  Use the helper script to download and parse checkpoints from the [DQN Replay Dataset](https://research.google/tools/datasets/dqn-replay/); this requires [gsutil](https://cloud.google.com/storage/docs/gsutil_install#install) to be installed. You may want to modify the script to download fewer checkpoints from fewer games, as otherwise this requires significant storage.
     * Or substitute your own pre-training data!  The codebase expects a series of .gz files, one each for observations, actions and terminals.
+```bash
+bash scripts/download_replay_dataset.sh $DATA_DIR
+```
 2.  To pretrain with SGI:
 ```bash
 python -m scripts.run public=True model_folder=./ offline.runner.save_every=2500 \
@@ -67,6 +70,7 @@ Data for SGI-R and SGI-E is not included due to its size, but can be re-generate
     ├── scripts
     │   ├── run.py                # The main runner script to launch jobs.
     │   ├── config.yaml           # The hydra configuration file, listing hyperparameters and options.
+    |   ├── download_replay_dataset.sh  # Helper script to download the DQN replay dataset.
     |   └── experiments           # Configurations for various experiments done by SGI.
     |   
     ├── src                     
