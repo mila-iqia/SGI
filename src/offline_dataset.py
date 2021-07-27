@@ -182,8 +182,8 @@ def get_offline_dataloaders(
     for i in range(1, frames):
         observation[:, :, i] = observation[:, :, i].roll(-i, 0)
     observation = observation[:-frames].unsqueeze(3) # tbfchw
-    action = torch.einsum('bt->tb', action)[frames-1:-1].long()
-    reward = torch.einsum('bt->tb', reward)[frames-1:-1]
+    action = torch.einsum('bt->tb', action)[frames-2:-2].long()
+    reward = torch.einsum('bt->tb', reward)[frames-2:-2]
     reward = torch.nan_to_num(reward).sign()  # Apparently possible, somehow.
     done = torch.einsum('bt->tb', done)[frames:].bool()
     return_, done_n = discount_return_n_step(reward[1:], done, n_step_return, discount)
